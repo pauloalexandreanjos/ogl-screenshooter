@@ -6,8 +6,6 @@ LINKERFLAGS=-lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lGLEW
 OUT_DIR=bin
 BUILD_DIR=build
 
-MKDIR_P = mkdir -p
-
 all: directories main
 
 .PHONY: directories
@@ -15,10 +13,10 @@ all: directories main
 directories: $(OUT_DIR) $(BUILD_DIR)
 
 $(OUT_DIR):
-	$(MKDIR_P) $(OUT_DIR)
+	mkdir -p $(OUT_DIR)
 
 $(BUILD_DIR):
-	$(MKDIR_P) $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)
 
 main: main.o
 	$(CPP) $(COMPILEFLAGS) -o bin/main build/main.o $(LINKERFLAGS)
