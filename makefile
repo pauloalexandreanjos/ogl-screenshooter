@@ -19,7 +19,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 main: main.o
-	$(LINKER) $(COMPILEFLAGS) -o bin/main build/main.o $(LINKERFLAGS)
+	$(LINKER) -o bin/main build/main.o $(LINKERFLAGS)
 
 main.o: src/main.cpp
 	$(CPP) $(COMPILEFLAGS) -o build/main.o src/main.cpp $(ERRORFLAGS)
