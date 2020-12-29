@@ -20,6 +20,10 @@ void processInput(GLFWwindow *window);
 
 void initTriangle(unsigned int);
 
-void renderScreen(unsigned int,unsigned int);
+void renderScreen(unsigned int,unsigned int,unsigned int);
 
 void renderTriangle(unsigned int,unsigned int);
+
+void initRetangle(unsigned int);
+
+void renderRetangle(unsigned int, unsigned int s);
