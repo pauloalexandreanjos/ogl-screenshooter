@@ -70,7 +70,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -86,7 +86,7 @@ int main() {
     }
 
     std::cout << "Sucesso: " << glewGetString(GLEW_VERSION) << std::endl;
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, 1280, 720);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -111,7 +111,7 @@ int main() {
     return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow*, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
