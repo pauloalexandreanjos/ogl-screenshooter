@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "Shader.h"
+#include "Texture.h"
 
 int main();
 
@@ -14,10 +15,10 @@ void processInput(GLFWwindow *window);
 
 void initTriangle(unsigned int);
 
-void renderScreen(unsigned int,Shader*);
+void renderScreen(unsigned int,Shader*,Texture*);
 
 void renderTriangle(unsigned int);
 
 void initRetangle(unsigned int);
 
-void renderRetangle(unsigned int, unsigned int s);
+void renderRetangle(unsigned int, unsigned int);

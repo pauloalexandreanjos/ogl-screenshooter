@@ -31,10 +31,12 @@ int main() {
         "/home/paulo/projetos/cpp/openglexample/src/shaders/simple.vert",
         "/home/paulo/projetos/cpp/openglexample/src/shaders/simple.frag");
 
-    unsigned int VAOtri;
+    Texture texture("/home/paulo/projetos/cpp/openglexample/src/container.jpg");
+
+    /*unsigned int VAOtri;
     glGenVertexArrays(1, &VAOtri);  
 
-    initTriangle(VAOtri);
+    initTriangle(VAOtri);*/
 
     unsigned int VAOret;
     glGenVertexArrays(1, &VAOret);  
@@ -44,10 +46,11 @@ int main() {
     // Wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    std::cout << "Começando o loop da janela..." << std::endl;
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
-        renderScreen(VAOtri, &shaderProgram);
+        renderScreen(VAOret, &shaderProgram, &texture);
         glfwSwapBuffers(window);
         glfwPollEvents();    
     }
@@ -67,7 +70,7 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 }
 
-void renderScreen(unsigned int VAOtri, /*unsigned int VAOret,*/ Shader *shaderProgram) {
+void renderScreen(/*unsigned int VAOtri, */unsigned int VAOret, Shader *shaderProgram, Texture *texture) {
 
     // Passa parametro para o shader
     /*float timeValue = glfwGetTime();
@@ -79,8 +82,8 @@ void renderScreen(unsigned int VAOtri, /*unsigned int VAOret,*/ Shader *shaderPr
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     shaderProgram->use();
-    renderTriangle(VAOtri);
-    //renderRetangle(VAOret, shaderProgram);
+    //renderTriangle(VAOtri);
+    renderRetangle(VAOret, texture->ID);
 }
 
 void initTriangle(unsigned int VAO) {
@@ -122,10 +125,11 @@ void renderTriangle(unsigned int VAO) {
 void initRetangle(unsigned int VAO) {
     
     float vertices[] = {
-        0.5f,  0.5f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
     };
     unsigned int indices[] = {  // note that we start from 0!
         0, 1, 3,   // first triangle
@@ -148,12 +152,18 @@ void initRetangle(unsigned int VAO) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     // 4. then set the vertex attributes pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0); 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2); 
 }
 
-void renderRetangle(unsigned int VAO, unsigned int shaderProgram) {
-    glUseProgram(shaderProgram);
+void renderRetangle(unsigned int VAO, unsigned int texture) {
+    glBindTexture(GL_TEXTURE_2D, texture);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
