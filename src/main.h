@@ -2,15 +2,9 @@
 #include <GL/glut.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <cmath>
 
-struct SHADERS {
-    unsigned int vertexShader;
-    unsigned int fragmentShader;
-};
-
-void createShaders(SHADERS *shaders);
-
-unsigned int createShaderProgram();
+#include "Shader.h"
 
 int main();
 
@@ -20,9 +14,9 @@ void processInput(GLFWwindow *window);
 
 void initTriangle(unsigned int);
 
-void renderScreen(unsigned int,unsigned int,unsigned int);
+void renderScreen(unsigned int,Shader*);
 
-void renderTriangle(unsigned int,unsigned int);
+void renderTriangle(unsigned int);
 
 void initRetangle(unsigned int);
 

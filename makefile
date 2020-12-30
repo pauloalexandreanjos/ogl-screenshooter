@@ -18,11 +18,14 @@ $(OUT_DIR):
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-main: main.o
-	$(LINKER) -o bin/main build/main.o $(LINKERFLAGS)
+main: main.o Shader.o
+	$(LINKER) -o bin/main build/main.o build/Shader.o $(LINKERFLAGS)
 
 main.o: src/main.cpp
 	$(CPP) $(COMPILEFLAGS) -o build/main.o src/main.cpp $(ERRORFLAGS)
+
+Shader.o: src/Shader.cpp
+	$(CPP) $(COMPILEFLAGS) -o build/Shader.o src/Shader.cpp $(ERRORFLAGS)
 
 clean:
 	rm -rf build/*.o *~ bin/main
