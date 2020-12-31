@@ -18,8 +18,8 @@ $(OUT_DIR):
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-main: main.o Shader.o Texture.o
-	$(LINKER) -o bin/main build/main.o build/Shader.o build/Texture.o build/precompiled.o $(LINKERFLAGS)
+main: main.o Shader.o Texture.o screenshot.o
+	$(LINKER) -o bin/main build/main.o build/Shader.o build/Texture.o build/precompiled.o build/screenshot.o $(LINKERFLAGS)
 
 main.o: src/main.cpp
 	$(CPP) $(COMPILEFLAGS) -o build/main.o src/main.cpp $(ERRORFLAGS)
@@ -29,6 +29,9 @@ Shader.o: src/Shader.cpp
 
 Texture.o: src/Texture.cpp
 	$(CPP) $(COMPILEFLAGS) -o build/Texture.o src/Texture.cpp $(ERRORFLAGS)
+
+screenshot.o: src/screenshot.cpp
+	$(CPP) $(COMPILEFLAGS) -o build/screenshot.o src/screenshot.cpp $(ERRORFLAGS)
 
 precompiled:
 	$(CPP) $(COMPILEFLAGS) -o build/precompiled.o src/precompiled.cpp $(ERRORFLAGS)
