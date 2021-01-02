@@ -1,8 +1,17 @@
 #include "main.h"
-#include <GL/freeglut_std.h>
+#include <GLFW/glfw3.h>
 
 #define WINDOW_WIDTH 1440
 #define WINDOW_HEIGHT 900
+
+double posicaoX = 0;
+double posicaoY = 0;
+
+bool startSelection = false;
+bool endSelection = false;
+
+double initPosX = 0;
+double initPosY = 0;
 
 int main() {
 
@@ -11,14 +20,12 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Para fazer full screen deve-se escolhar um monitor
-    //glfwGetPrimaryMonitor()
-
     int width, height, bitsPerPixel;
     std::vector<char> pixels;
 
     ImageFromDisplay(pixels, width, height, bitsPerPixel);
 
+    // Para fazer full screen deve-se escolhar um monitor
     auto monitor = glfwGetPrimaryMonitor();
 
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -29,7 +36,7 @@ int main() {
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
     
     //GLFWwindow* window = glfwCreateWindow(1280, 720, "LearnOpenGL", NULL, NULL);
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Sreenshooter", monitor, NULL);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Screenshooter", monitor, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -47,11 +54,16 @@ int main() {
     std::cout << "Carregou o GLEW na versão -> " << glewGetString(GLEW_VERSION) << std::endl;
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
+    // TODO: Verificar pois talvez não seja necessário pois essa janela nunca é redimensionada
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    Shader shaderProgram(
-        "/home/paulo/projetos/cpp/openglexample/src/shaders/simple.vert",
-        "/home/paulo/projetos/cpp/openglexample/src/shaders/simple.frag");
+    Shader shaderTexture(
+        "/home/paulo/projetos/cpp/openglexample/src/shaders/texture.vert",
+        "/home/paulo/projetos/cpp/openglexample/src/shaders/texture.frag");
+
+    Shader shaderColor(
+        "/home/paulo/projetos/cpp/openglexample/src/shaders/color.vert",
+        "/home/paulo/projetos/cpp/openglexample/src/shaders/color.frag");
 
     //Texture texture("/home/paulo/projetos/cpp/openglexample/src/container.jpg");
 
@@ -62,25 +74,56 @@ int main() {
 
     initTriangle(VAOtri);*/
 
-    unsigned int VAOret;
-    glGenVertexArrays(1, &VAOret);  
+    unsigned int VAORet;
+    glGenVertexArrays(1, &VAORet);  
 
-    initRetangle(VAOret);
+    initRetangle(VAORet);
+
+    unsigned int VAOLineV;
+    glGenVertexArrays(1, &VAOLineV);  
+
+    initLine(VAOLineV, false);
+
+    unsigned int VAOLineH;
+    glGenVertexArrays(1, &VAOLineH);  
+
+    initLine(VAOLineH, true);
 
     // Wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    Shader *shaders[] = { &shaderTexture, &shaderColor};
+
+    // Desabilita o cursor do mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // Callback de posição do mouse
+    glfwSetCursorPosCallback(window, mousePositionCallback);
+    
+    // Callback de clique do mouse
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
     std::cout << "Começando o loop da janela..." << std::endl;
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
-        renderScreen(VAOret, &shaderProgram, &texture);
+        renderScreen(VAORet, VAOLineV, VAOLineH, shaders, &texture);
         glfwSwapBuffers(window);
         glfwPollEvents();    
     }
 
     glfwTerminate();
     return 0;
+}
+
+float screenXtoGlX(int pos) {
+    pos += 1;
+    return 2.f * (pos - 1) / (1440 - 1) - 1;
+}
+
+float screenYtoGlY(int pos) {
+    pos += 1;
+    return 2.f * (pos - 1) / (900 - 1) - 1;
 }
 
 void framebuffer_size_callback(GLFWwindow*, int width, int height)
@@ -94,20 +137,52 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 }
 
-void renderScreen(/*unsigned int VAOtri, */unsigned int VAOret, Shader *shaderProgram, Texture *texture) {
+void mousePositionCallback(GLFWwindow* window, double xpos, double ypos) {
+    //std::cout << "X: " << xpos << " Y: " << ypos << std::endl;
+    posicaoX = xpos;
+    posicaoY = ypos;
+}
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        startSelection = true;
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+        //endSelection = true;
+        startSelection = false;
+}
+void renderScreen(unsigned int VAORet, unsigned int VAOLineV, unsigned int VAOLineH, Shader *shaders[2], Texture *texture) {
 
     // Passa parametro para o shader
     /*float timeValue = glfwGetTime();
     float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-    int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-
+    int vertexColorLocation = glGetUniformLocation(shaders, "ourColor");
     glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);*/
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    shaderProgram->use();
-    //renderTriangle(VAOtri);
-    renderRetangle(VAOret, texture->ID);
+    shaders[0]->use();
+    
+    renderRetangle(VAORet, texture->ID);
+
+    if (!startSelection) {
+
+        int vertexColorLocation = glGetUniformLocation(shaders[1]->shaderID, "myPosition");
+        shaders[1]->use();
+        //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+        float xLoc = screenXtoGlX(posicaoX);
+        float yLoc = screenYtoGlY(posicaoY);
+
+        glUniform2f(vertexColorLocation, 0.0f, yLoc);
+
+        renderLine(VAOLineV);
+
+        glUniform2f(vertexColorLocation, xLoc, 0.0f);
+
+        renderLine(VAOLineH);
+    }
 }
 
 void initTriangle(unsigned int VAO) {
@@ -198,4 +273,46 @@ void renderRetangle(unsigned int VAO, unsigned int texture) {
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
+
+void initLine(unsigned int VAO, bool horizontal) {
+
+    float vertices[] = {
+        // posisions       colors
+        /*1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f*/
+        0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+    };
+
+    if (!horizontal) {
+        vertices[0] = 1.0f;
+        vertices[6] = -1.0f;
+    } else {
+        vertices[1] = 1.0f;
+        vertices[7] = -1.0f;
+    }
+
+    unsigned int VBO;
+    glGenBuffers(1, &VBO); 
+
+    // ..:: Initialization code (done once (unless your object frequently changes)) :: ..
+    // 1. bind Vertex Array Object
+    glBindVertexArray(VAO);
+    // 2. copy our vertices array in a buffer for OpenGL to use
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    // 3. then set our vertex attributes pointers
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void renderLine(unsigned int VAO) {
+    glBindVertexArray(VAO);
+    glLineWidth(3.f);
+    glDrawArrays(GL_LINE_STRIP, 0, 2);
 }

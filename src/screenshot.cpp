@@ -16,9 +16,7 @@ void ImageFromDisplay(std::vector<char>& Pixels, int& Width, int& Height, int& B
     BitsPerPixel = img->bits_per_pixel;
     Pixels.resize(Width * Height * 4);
 
-    Pixels.insert(Pixels.begin(), &img->data[0], &img->data[Pixels.size()]); //, img->data[Pixels.size()-1]);
-
-    //memcpy(&Pixels[0], img->data, Pixels.size());
+    Pixels.insert(Pixels.begin(), &img->data[0], &img->data[Pixels.size()]);
 
     XDestroyImage(img);
     XCloseDisplay(display);
