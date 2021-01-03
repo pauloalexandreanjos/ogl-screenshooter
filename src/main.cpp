@@ -1,4 +1,5 @@
 #include "main.h"
+#include <array>
 
 #define WINDOW_WIDTH 1440
 #define WINDOW_HEIGHT 900
@@ -12,7 +13,13 @@ bool endSelection = false;
 double initPosX = 0;
 double initPosY = 0;
 
+unsigned int VAORectangle;
+
+std::array<float, 16> zeroes;
+
 int main() {
+
+    zeroes.fill(0.0f);
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -68,11 +75,6 @@ int main() {
 
     Texture texture = Texture(pixels, width, height);
 
-    /*unsigned int VAOtri;
-    glGenVertexArrays(1, &VAOtri);  
-
-    initTriangle(VAOtri);*/
-
     unsigned int VAORet;
     glGenVertexArrays(1, &VAORet);  
 
@@ -87,11 +89,6 @@ int main() {
     glGenVertexArrays(1, &VAOLineH);  
 
     initLine(VAOLineH, true);
-
-    unsigned int VAORectangle;
-    glGenVertexArrays(1, &VAORectangle);  
-
-    initLineRectangle(VAORectangle);
 
     // Wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -111,7 +108,7 @@ int main() {
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
-        renderScreen(VAORet, VAOLineV, VAOLineH, VAORectangle, shaders, &texture);
+        renderScreen(VAORet, VAOLineV, VAOLineH, shaders, &texture);
         glfwSwapBuffers(window);
         glfwPollEvents();    
     }
@@ -127,7 +124,7 @@ float screenXtoGlX(int pos) {
 
 float screenYtoGlY(int pos) {
     pos += 1;
-    return 2.f * (pos - 1) / (900 - 1) - 1;
+    return 2.f * (pos - 900) / (1 - 900) - 1;
 }
 
 void framebuffer_size_callback(GLFWwindow*, int width, int height)
@@ -149,9 +146,15 @@ void mousePositionCallback(GLFWwindow*, double xpos, double ypos) {
 void mouseButtonCallback(GLFWwindow*, int button, int action, int)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        startSelection = true;
+
         initPosX = posicaoX;
         initPosY = posicaoY;
+        startSelection = true;
+
+        glGenVertexArrays(1, &VAORectangle);
+        std::cout << "Gerou o VAO: " << VAORectangle << std::endl;
+
+        initLineRectangle(VAORectangle, screenXtoGlX(posicaoX), screenYtoGlY(posicaoY));
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
@@ -166,7 +169,7 @@ void mouseButtonCallback(GLFWwindow*, int button, int action, int)
         Shader * colorShader;
     }
 */
-void renderScreen(unsigned int VAORet, unsigned int VAOLineV, unsigned int VAOLineH, unsigned int VAORectangle, Shader *shaders[2], Texture *texture) {
+void renderScreen(unsigned int VAORet, unsigned int VAOLineV, unsigned int VAOLineH, Shader *shaders[2], Texture *texture) {
 
     Shader* textureShader = shaders[0];
     Shader* colorShader = shaders[1];
@@ -184,10 +187,13 @@ void renderScreen(unsigned int VAORet, unsigned int VAOLineV, unsigned int VAOLi
 
     colorShader->use();
 
-    if (startSelection) {
+    if (!startSelection) {
 
         int vertexColorLocation = glGetUniformLocation(colorShader->shaderID, "myPosition");
         //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+        int transformLocation = glGetUniformLocation(colorShader->shaderID, "transform");
+        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, zeroes.data());
 
         float xLoc = screenXtoGlX(posicaoX);
         float yLoc = screenYtoGlY(posicaoY);
@@ -200,9 +206,33 @@ void renderScreen(unsigned int VAORet, unsigned int VAOLineV, unsigned int VAOLi
 
         renderLine(VAOLineH);
     } else {
-        
+
+        // Código de teste
+        //float timeValue = glfwGetTime();
+        //float movement = (sin(timeValue) / 2.0f) + 0.5f;
+        //std::cout << "value: " << movement << std::endl;
+
+        //glm::mat4 trans = glm::mat4(movement);
+
+        float xLoc = screenXtoGlX(initPosX) - screenXtoGlX(posicaoX);
+        float yLoc = screenYtoGlY(initPosY) - screenYtoGlY(posicaoY);
+
+        std::cout << "initPosX: " << initPosX << " posicaoX: " << posicaoX << std::endl;
+        std::cout << "initPosY: " << initPosY << " posicaoY: " << posicaoY << std::endl;
+        std::cout << "X: " << xLoc << " Y: " << yLoc << std::endl;
+
+        float trans[] = {
+            0.0f, -yLoc, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f,
+            -xLoc, 0.0f, 0.0f, 0.0f,
+            -xLoc, -yLoc, 0.0f, 0.0f
+        };
+
         int vertexColorLocation = glGetUniformLocation(colorShader->shaderID, "myPosition");
         glUniform2f(vertexColorLocation, 0.0f, 0.0f);
+
+        int transformLocation = glGetUniformLocation(colorShader->shaderID, "transform");
+        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, trans);
 
         renderLines(VAORectangle);
     }
@@ -333,16 +363,18 @@ void renderLine(unsigned int VAO) {
     glDrawArrays(GL_LINE_STRIP, 0, 2);
 }
 
-void initLineRectangle(unsigned int VAO) {
+void initLineRectangle(unsigned int VAO, float initPosX, float initPosY) {
     
+    std::cout << "Iniciou o retangulo com as posições iniciais x:" << initPosX << " y:" << initPosY << std::endl;
+
     float vertices[] = {
         // posisions       colors
         /*1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
         -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f*/
-        0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-        0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+        initPosX, initPosY, 0.0f, 1.0f, 0.0f, 0.0f,
+        initPosX, initPosY, 0.0f, 0.0f, 1.0f, 0.0f,
+        initPosX, initPosY, 0.0f, 1.0f, 0.0f, 0.0f,
+        initPosX, initPosY, 0.0f, 0.0f, 1.0f, 0.0f
     };
 
     unsigned int VBO;
