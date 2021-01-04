@@ -4,9 +4,10 @@
 #include <iostream>
 #include <cmath>
 #include <array>
-#include "glm/glm.hpp"
+#include <vector>
+/*#include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/type_ptr.hpp"*/
 
 #include "Shader.h"
 #include "Texture.h"
@@ -42,3 +43,5 @@ float screenYtoGlY(int);
 void initLineRectangle(unsigned int,float,float);
 
 void renderLines(unsigned int);
+
+void cutImage(SSImage&);

@@ -12,7 +12,7 @@
 class Texture {
     public:
         unsigned int ID;
-        Texture(std::vector<char>&,int,int);
+        Texture(SSImage&);
         Texture(std::string textureFile);
 };
 

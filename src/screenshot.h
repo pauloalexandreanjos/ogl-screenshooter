@@ -9,6 +9,19 @@
 #include <sys/types.h>
 #include <vector>
 
-void ImageFromDisplay(std::vector<char>& Pixels, int& Width, int& Height, int& BitsPerPixel);
+class SSImage {
+    private:
+        XImage* image;
+        Display* display;
+        int Width, Height;
+    public:
+        SSImage();
+        ~SSImage();
+        void CopyData(std::vector<u_char>&);
+        XImage* getXImage();
+        int getWidth();
+        int getHeight();
+        void destroy();
+};
 
 #endif

@@ -1,23 +1,43 @@
 #include "screenshot.h"
 #include <sys/types.h>
 
-void ImageFromDisplay(std::vector<char>& Pixels, int& Width, int& Height, int& BitsPerPixel)
+SSImage::SSImage()
 {
-    Display* display = XOpenDisplay(nullptr);
-    Window root = DefaultRootWindow(display);
+    this->display = XOpenDisplay(nullptr);
+    Window root = DefaultRootWindow(this->display);
 
     XWindowAttributes attributes;
-    XGetWindowAttributes(display, root, &attributes);
+    XGetWindowAttributes(this->display, root, &attributes);
 
-    Width = attributes.width;
-    Height = attributes.height;
+    this->Width = attributes.width;
+    this->Height = attributes.height;
 
-    XImage* img = XGetImage(display, root, 0, 0 , Width, Height, AllPlanes, ZPixmap);
-    BitsPerPixel = img->bits_per_pixel;
+    this->image = XGetImage(this->display, root, 0, 0 , this->Width, this->Height, AllPlanes, ZPixmap);
+}
+
+SSImage::~SSImage() {
+    this->destroy();
+}
+
+void SSImage::destroy() {
+    XDestroyImage(this->image);
+    XCloseDisplay(this->display);
+}
+
+void SSImage::CopyData(std::vector<u_char> &Pixels) {
     Pixels.resize(Width * Height * 4);
 
-    Pixels.insert(Pixels.begin(), &img->data[0], &img->data[Pixels.size()]);
+    Pixels.insert(Pixels.begin(), &this->image->data[0], &this->image->data[Pixels.size()]);
+}
 
-    XDestroyImage(img);
-    XCloseDisplay(display);
+XImage* SSImage::getXImage() {
+    return this->image;
+}
+
+int SSImage::getWidth() {
+    return this->Width;
+}
+
+int SSImage::getHeight() {
+    return this->Height;
 }

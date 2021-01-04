@@ -1,5 +1,5 @@
 #include "main.h"
-#include <array>
+#include "screenshot.h"
 
 #define WINDOW_WIDTH 1440
 #define WINDOW_HEIGHT 900
@@ -26,10 +26,8 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    int width, height, bitsPerPixel;
-    std::vector<char> pixels;
-
-    ImageFromDisplay(pixels, width, height, bitsPerPixel);
+    //ImageFromDisplay(pixels, width, height, bitsPerPixel);
+    SSImage screenImage = SSImage();
 
     // Para fazer full screen deve-se escolhar um monitor
     auto monitor = glfwGetPrimaryMonitor();
@@ -71,9 +69,7 @@ int main() {
         "/home/paulo/projetos/cpp/openglexample/src/shaders/color.vert",
         "/home/paulo/projetos/cpp/openglexample/src/shaders/color.frag");
 
-    //Texture texture("/home/paulo/projetos/cpp/openglexample/src/container.jpg");
-
-    Texture texture = Texture(pixels, width, height);
+    Texture texture = Texture(screenImage);
 
     unsigned int VAORet;
     glGenVertexArrays(1, &VAORet);  
@@ -111,10 +107,56 @@ int main() {
         renderScreen(VAORet, VAOLineV, VAOLineH, shaders, &texture);
         glfwSwapBuffers(window);
         glfwPollEvents();    
+
+        if (endSelection) {
+            glfwSetWindowShouldClose(window, true);
+
+            cutImage(screenImage);
+        }
     }
 
     glfwTerminate();
     return 0;
+}
+
+void cutImage(SSImage &image) {
+    std::array<double, 4> alignCoords;
+
+    alignCoords[0] = initPosX;
+    alignCoords[1] = posicaoX;
+    alignCoords[2] = initPosY;
+    alignCoords[3] = posicaoY;
+
+    if (initPosX > posicaoX) {
+        alignCoords[0] = posicaoX;
+        alignCoords[1] = initPosX;
+    }
+
+    if (initPosY > posicaoY) {
+        alignCoords[2] = posicaoY;
+        alignCoords[3] = initPosY;
+    }
+
+    int initCutX = alignCoords[0];
+    int endCutX = alignCoords[1];
+    int initCutY = alignCoords[2];
+    int endCutY = alignCoords[3];
+
+    std::cout << "Recortando imagem das coordenadas" <<
+    " X: " << initCutX <<
+    " até " << endCutX <<
+    " Y: " << initCutY <<
+    " até " << endCutY << std::endl;
+
+    std::cout << "Tentando montar a subimage..." << std::endl;
+    XImage* cut = image.getXImage()->f.sub_image(
+        image.getXImage(),
+        initCutX,
+        initCutY,
+        endCutX,
+        endCutY);
+
+    char * dados = cut->data;
 }
 
 float screenXtoGlX(int pos) {
@@ -139,6 +181,7 @@ void processInput(GLFWwindow *window)
 }
 
 void mousePositionCallback(GLFWwindow*, double xpos, double ypos) {
+
     posicaoX = xpos;
     posicaoY = ypos;
 }
@@ -158,8 +201,7 @@ void mouseButtonCallback(GLFWwindow*, int button, int action, int)
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-        //endSelection = true;
-        startSelection = false;
+        endSelection = true;
 }
 
 /*
@@ -207,19 +249,8 @@ void renderScreen(unsigned int VAORet, unsigned int VAOLineV, unsigned int VAOLi
         renderLine(VAOLineH);
     } else {
 
-        // Código de teste
-        //float timeValue = glfwGetTime();
-        //float movement = (sin(timeValue) / 2.0f) + 0.5f;
-        //std::cout << "value: " << movement << std::endl;
-
-        //glm::mat4 trans = glm::mat4(movement);
-
         float xLoc = screenXtoGlX(initPosX) - screenXtoGlX(posicaoX);
         float yLoc = screenYtoGlY(initPosY) - screenYtoGlY(posicaoY);
-
-        std::cout << "initPosX: " << initPosX << " posicaoX: " << posicaoX << std::endl;
-        std::cout << "initPosY: " << initPosY << " posicaoY: " << posicaoY << std::endl;
-        std::cout << "X: " << xLoc << " Y: " << yLoc << std::endl;
 
         float trans[] = {
             0.0f, -yLoc, 0.0f, 0.0f,

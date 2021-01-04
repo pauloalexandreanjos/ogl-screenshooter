@@ -1,7 +1,7 @@
 #include "Texture.h"
-#include <vector>
+#include "screenshot.h"
 
-Texture::Texture(std::vector<char>& pixels, int width, int height) {
+Texture::Texture(SSImage& screenImage) {
 
     std::cout << "Carregando textura" << std::endl;
     glGenTextures(1, &this->ID); 
@@ -13,8 +13,13 @@ Texture::Texture(std::vector<char>& pixels, int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    std::cout << "Configurando textura..." << std::endl;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels.data());
+    std::cout << "Configurando textura..." <<
+    " width: " << screenImage.getWidth() << 
+    " height: " << screenImage.getHeight() <<
+    std::endl;
+
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenImage.getXImage()->width, screenImage.getXImage()->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, screenImage.getXImage()->data);
     std::cout << "Gerando Mipmap..." << std::endl;
     glGenerateMipmap(GL_TEXTURE_2D);
 }
