@@ -2,7 +2,7 @@ CPP=clang
 LINKER=g++
 COMPILEFLAGS=-std=c++20 -O3
 ERRORFLAGS=-c -W -Wall -pedantic
-LINKERFLAGS=-lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lGLEW
+LINKERFLAGS=-lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lGLEW -ljpeg
 OUT_DIR=bin
 BUILD_DIR=build
 

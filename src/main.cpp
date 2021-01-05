@@ -149,14 +149,15 @@ void cutImage(SSImage &image) {
     " até " << endCutY << std::endl;
 
     std::cout << "Tentando montar a subimage..." << std::endl;
-    XImage* cut = image.getXImage()->f.sub_image(
-        image.getXImage(),
+    image.setSubImage(
         initCutX,
         initCutY,
-        endCutX,
-        endCutY);
+        endCutX - initCutX,
+        endCutY - initCutY
+    );
 
-    char * dados = cut->data;
+
+    image.save();
 }
 
 float screenXtoGlX(int pos) {
