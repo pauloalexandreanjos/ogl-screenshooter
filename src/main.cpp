@@ -25,6 +25,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, 1);
 
     //ImageFromDisplay(pixels, width, height, bitsPerPixel);
     SSImage screenImage = SSImage();
@@ -222,11 +223,11 @@ void renderScreen(unsigned int VAORet, unsigned int VAOLineV, unsigned int VAOLi
     int vertexColorLocation = glGetUniformLocation(shaders, "ourColor");
     glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);*/
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.2f, 0.3f, 0.3f, 0.1f);
     glClear(GL_COLOR_BUFFER_BIT);
     textureShader->use();
     
-    renderRetangle(VAORet, texture->ID);
+    //renderRetangle(VAORet, texture->ID);
 
     colorShader->use();
 
