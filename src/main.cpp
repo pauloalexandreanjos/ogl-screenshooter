@@ -1,5 +1,4 @@
 #include "main.h"
-#include "screenshot.h"
 
 #define WINDOW_WIDTH 1440
 #define WINDOW_HEIGHT 900

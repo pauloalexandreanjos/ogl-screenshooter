@@ -8,7 +8,13 @@ BUILD_DIR=build
 
 all: directories main
 
-.PHONY: directories
+test: bin/test
+	bin/test
+
+bin/test: test.o screenshot.o
+	$(LINKER) -o bin/test build/test.o build/screenshot.o $(LINKERFLAGS) -lgtest	
+
+.PHONY: directories test
 
 directories: $(OUT_DIR) $(BUILD_DIR)
 
@@ -35,6 +41,9 @@ screenshot.o: src/screenshot.cpp
 
 precompiled:
 	$(CPP) $(COMPILEFLAGS) -o build/precompiled.o src/precompiled.cpp $(ERRORFLAGS)
+
+test.o: src/test.cpp
+	$(CPP) $(COMPILEFLAGS) -o build/test.o src/test.cpp $(ERRORFLAGS)
 
 clean:
 	rm -rf build/*.o *~ bin/main

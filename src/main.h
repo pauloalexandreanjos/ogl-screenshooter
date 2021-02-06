@@ -11,6 +11,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
+#include "screenshot.h"
 
 int main();
 

@@ -1,3 +1,4 @@
 *.o
 bin/main
 src/glm
+saida.jpeg
